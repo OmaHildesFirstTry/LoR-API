@@ -1,7 +1,54 @@
 from flask import Flask, jsonify, request
-import requests
+import requests  # ✅ Re-added the missing requests import
 
 app = Flask(__name__)
+
+# OpenAPI Specification Route
+@app.route("/openapi.json", methods=["GET"])
+def openapi():
+    return jsonify({
+        "openapi": "3.0.0",
+        "info": {
+            "title": "Legends of Runeterra Card API",
+            "version": "1.0.0",
+            "description": "Fetches all LoR cards for deck building."
+        },
+        "servers": [
+            {"url": "https://lor-api.onrender.com"}
+        ],
+        "paths": {
+            "/lor/cards": {
+                "get": {
+                    "summary": "Fetch all Legends of Runeterra cards",
+                    "operationId": "getLoRCards",
+                    "responses": {
+                        "200": {
+                            "description": "A list of LoR cards",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {"type": "string"},
+                                                "region": {"type": "string"},
+                                                "cost": {"type": "integer"},
+                                                "attack": {"type": "integer"},
+                                                "health": {"type": "integer"},
+                                                "text": {"type": "string"},
+                                                "cardCode": {"type": "string"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
 
 # List of URLs for all LoR sets
 SET_URLS = [
@@ -38,13 +85,13 @@ def fetch_lor_cards():
 
     return all_cards
 
-@app.route("/lor/cards", methods=["GET"])
-def get_cards():
-    return jsonify(fetch_lor_cards())
-
 @app.route("/")
 def home():
     return "LoR API is running! Use /lor/cards to get data."
+
+@app.route("/lor/cards", methods=["GET"])
+def get_cards():
+    return jsonify(fetch_lor_cards())
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
