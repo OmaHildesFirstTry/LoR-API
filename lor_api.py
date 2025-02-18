@@ -1,14 +1,9 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
 
-# Homepage route (fixes the 404 error)
-@app.route("/")
-def home():
-    return "Legends of Runeterra API is running! Use /lor/cards to get data."
-
-# List of URLs for all Legends of Runeterra card sets
+# List of URLs for all LoR sets
 SET_URLS = [
     "https://dd.b.pvp.net/latest/set1/en_us/data/set1-en_us.json",
     "https://dd.b.pvp.net/latest/set2/en_us/data/set2-en_us.json",
@@ -21,21 +16,35 @@ SET_URLS = [
     "https://dd.b.pvp.net/latest/set9/en_us/data/set9-en_us.json"
 ]
 
-# Function to fetch all Legends of Runeterra cards
+# Fetch all cards with reduced data size
 def fetch_lor_cards():
     all_cards = []
     for url in SET_URLS:
         response = requests.get(url)
         if response.status_code == 200:
-            set_cards = response.json()
-            all_cards.extend(set_cards)  # Add all cards from the set to our list
+            cards = response.json()
+            for card in cards:
+                all_cards.append({
+                    "name": card.get("name", ""),
+                    "region": card.get("regionRef", ""),
+                    "cost": card.get("cost", 0),
+                    "attack": card.get("attack", 0),
+                    "health": card.get("health", 0),
+                    "text": card.get("descriptionRaw", ""),
+                    "cardCode": card.get("cardCode", "")
+                })
         else:
             print(f"Failed to fetch {url}")
+
     return all_cards
 
 @app.route("/lor/cards", methods=["GET"])
 def get_cards():
     return jsonify(fetch_lor_cards())
+
+@app.route("/")
+def home():
+    return "LoR API is running! Use /lor/cards to get data."
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
