@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import requests  # ✅ Re-added the missing requests import
+import requests  # ✅ Ensure requests is imported
 
 app = Flask(__name__)
 
@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route("/openapi.json", methods=["GET"])
 def openapi():
     return jsonify({
-        "openapi": "3.0.0",
+        "openapi": "3.1.0",  # ✅ Updated to match OpenAI's requirement
         "info": {
             "title": "Legends of Runeterra Card API",
             "version": "1.0.0",
