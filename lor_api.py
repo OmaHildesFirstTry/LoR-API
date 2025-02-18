@@ -3,6 +3,11 @@ import requests
 
 app = Flask(__name__)
 
+# Homepage route (fixes the 404 error)
+@app.route("/")
+def home():
+    return "Legends of Runeterra API is running! Use /lor/cards to get data."
+
 # List of URLs for all Legends of Runeterra card sets
 SET_URLS = [
     "https://dd.b.pvp.net/latest/set1/en_us/data/set1-en_us.json",
@@ -19,7 +24,6 @@ SET_URLS = [
 # Function to fetch all Legends of Runeterra cards
 def fetch_lor_cards():
     all_cards = []
-
     for url in SET_URLS:
         response = requests.get(url)
         if response.status_code == 200:
@@ -27,7 +31,6 @@ def fetch_lor_cards():
             all_cards.extend(set_cards)  # Add all cards from the set to our list
         else:
             print(f"Failed to fetch {url}")
-
     return all_cards
 
 @app.route("/lor/cards", methods=["GET"])
